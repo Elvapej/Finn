@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FINN Kortfinner</title>
+  <style>
+    :root {
+      --bg: #f6f0e5;
+      --surface: #fffdf8;
+      --surface-soft: #f3ead8;
+      --text: #2f2419;
+      --muted: #746557;
+      --border: #ddcfb9;
+      --accent: #d96f32;
+      --accent-soft: #fff1e8;
+      --good: #2b7a4b;
+      --fair: #9a6a19;
+      --bad: #b24242;
+      --shadow: 0 16px 40px rgba(47, 36, 25, 0.08);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217, 111, 50, 0.14), transparent 26%),
+        linear-gradient(180deg, #fbf7f1 0%, var(--bg) 100%);
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 760px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 1.02rem;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel,
+    .results {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 22px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .panel h2,
+    .results h2 {
+      margin: 0 0 10px;
+      font-size: 1.2rem;
+    }
+
+    .panel p,
+    .results p {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .sample-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .sample-item {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+    }
+
+    .sample-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .run-button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .run-button:hover {
+      opacity: 0.92;
+    }
+
+    .results {
+      padding: 22px;
+    }
+
+    .cards {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(243, 234, 216, 0.8));
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 14px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .price-tag {
+      white-space: nowrap;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .meta,
+    .comparison {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-item,
+    .comparison-item {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 253, 248, 0.85);
+      border: 1px solid var(--border);
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.84rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .value {
+      font-weight: 700;
+    }
+
+    .comparison {
+      margin-top: 10px;
+    }
+
+    .verdict {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .underpriced {
+      background: rgba(43, 122, 75, 0.12);
+      color: var(--good);
+    }
+
+    .fair {
+      background: rgba(154, 106, 25, 0.12);
+      color: var(--fair);
+    }
+
+    .overpriced {
+      background: rgba(178, 66, 66, 0.12);
+      color: var(--bad);
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        width: min(100% - 20px, 1100px);
+        padding-top: 20px;
+      }
+
+      .meta,
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">MVP for finn.no</span>
+      <h1>En superenkel kortsjekk for FINN-annonser</h1>
+      <p class="lead">
+        Denne demoen bruker bare hardkodede eksempler. Den prøver å hente ut kortnavn, settnavn,
+        kortnummer og eventuell PSA/BGS/CGC-grade fra annonsetekst, og sammenligner så mot en mock markedspris.
+      </p>
+    </section>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2>Eksempeldata</h2>
+        <p>Ingen scraping. Ingen API-er. Bare enkel struktur og logikk.</p>
+
+        <div class="sample-list" id="sampleList"></div>
+
+        <button class="run-button" id="runButton" type="button">Kjør vurdering</button>
+      </aside>
+
+      <section class="results">
+        <h2>Resultat</h2>
+        <p>
+          Under ser du hva som ble tolket fra hver listing og hvordan prisen ser ut opp mot mock markedsverdi.
+        </p>
+
+        <div class="cards" id="results"></div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const listings = [
+      {
+        title: "Pokemon Charizard Base Set 4/102 PSA 8",
+        price: 4200
+      },
+      {
+        title: "Pikachu VMAX Trainer Gallery TG17 Lost Origin",
+        price: 650
+      },
+      {
+        title: "Umbreon H30/H32 Skyridge BGS 9.5",
+        price: 16000
+      },
+      {
+        title: "Mewtwo GX Hidden Fates SV59 CGC 9",
+        price: 1900
+      }
+    ];
+
+    const marketPrices = {
+      "charizard|base set|4/102|PSA 8": 5000,
+      "pikachu vmax|lost origin|TG17|RAW": 600,
+      "umbreon|skyridge|H30/H32|BGS 9.5": 14500,
+      "mewtwo gx|hidden fates|SV59|CGC 9": 2100
+    };
+
+    const knownSets = [
+      "base set",
+      "lost origin",
+      "skyridge",
+      "hidden fates"
+    ];
+
+    const knownCards = [
+      "charizard",
+      "pikachu vmax",
+      "umbreon",
+      "mewtwo gx"
+    ];
+
+    const sampleList = document.getElementById("sampleList");
+    const resultsContainer = document.getElementById("results");
+    const runButton = document.getElementById("runButton");
+
+    function formatCurrency(value) {
+      return value.toLocaleString("nb-NO") + " kr";
+    }
+
+    function findFirstMatch(text, items) {
+      return items.find(function (item) {
+        return text.includes(item);
+      }) || null;
+    }
+
+    function extractCardNumber(text) {
+      const match = text.match(/\b([A-Z]{0,3}\d{1,3}\/\d{1,3}|[A-Z]{1,3}\d{1,3})\b/i);
+      return match ? match[1].toUpperCase() : null;
+    }
+
+    function extractGrade(text) {
+      const match = text.match(/\b(PSA|BGS|CGC)\s?(\d+(?:\.\d)?)\b/i);
+
+      if (!match) {
+        return "RAW";
+      }
+
+      return match[1].toUpperCase() + " " + match[2];
+    }
+
+    function normalizeTitleCase(value) {
+      if (!value) {
+        return "Ukjent";
+      }
+
+      return value
+        .split(" ")
+        .map(function (part) {
+          return part.charAt(0).toUpperCase() + part.slice(1);
+        })
+        .join(" ");
+    }
+
+    function buildMarketKey(cardName, setName, cardNumber, grade) {
+      return [
+        cardName || "ukjent",
+        setName || "ukjent",
+        cardNumber || "ukjent",
+        grade || "RAW"
+      ].join("|");
+    }
+
+    function getVerdict(percentDiff) {
+      if (percentDiff <= -15) {
+        return "underpriced";
+      }
+
+      if (percentDiff >= 15) {
+        return "overpriced";
+      }
+
+      return "fair";
+    }
+
+    function extractListingData(listing) {
+      const lowerTitle = listing.title.toLowerCase();
+      const cardName = findFirstMatch(lowerTitle, knownCards);
+      const setName = findFirstMatch(lowerTitle, knownSets);
+      const cardNumber = extractCardNumber(listing.title);
+      const grade = extractGrade(listing.title);
+      const key = buildMarketKey(cardName, setName, cardNumber, grade);
+      const estimatedValue = marketPrices[key] || 0;
+      const percentDiff = estimatedValue === 0
+        ? 0
+        : ((listing.price - estimatedValue) / estimatedValue) * 100;
+      const verdict = getVerdict(percentDiff);
+
+      return {
+        originalTitle: listing.title,
+        price: listing.price,
+        cardName: normalizeTitleCase(cardName),
+        setName: normalizeTitleCase(setName),
+        cardNumber: cardNumber || "Ukjent",
+        grade,
+        estimatedValue,
+        percentDiff,
+        verdict
+      };
+    }
+
+    function renderSamples() {
+      sampleList.innerHTML = listings.map(function (listing) {
+        return `
+          <div class="sample-item">
+            <strong>${listing.title}</strong>
+            <span>${formatCurrency(listing.price)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderResults() {
+      const results = listings.map(extractListingData);
+
+      resultsContainer.innerHTML = results.map(function (item) {
+        const verdictLabel = item.verdict === "underpriced"
+          ? "Underpriced"
+          : item.verdict === "overpriced"
+            ? "Overpriced"
+            : "Fair";
+
+        const estimatedLabel = item.estimatedValue > 0
+          ? formatCurrency(item.estimatedValue)
+          : "Ingen mock-pris";
+
+        return `
+          <article class="card">
+            <div class="card-top">
+              <div>
+                <h3>${item.originalTitle}</h3>
+              </div>
+              <div class="price-tag">${formatCurrency(item.price)}</div>
+            </div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <span class="label">card_name</span>
+                <span class="value">${item.cardName}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">set_name</span>
+                <span class="value">${item.setName}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">card_number</span>
+                <span class="value">${item.cardNumber}</span>
+              </div>
+              <div class="meta-item">
+                <span class="label">grade</span>
+                <span class="value">${item.grade}</span>
+              </div>
+            </div>
+
+            <div class="comparison">
+              <div class="comparison-item">
+                <span class="label">price</span>
+                <span class="value">${formatCurrency(item.price)}</span>
+              </div>
+              <div class="comparison-item">
+                <span class="label">estimated value</span>
+                <span class="value">${estimatedLabel}</span>
+              </div>
+              <div class="comparison-item">
+                <span class="label">% difference</span>
+                <span class="value">${item.percentDiff.toFixed(1)}%</span>
+              </div>
+              <div class="comparison-item">
+                <span class="label">verdict</span>
+                <span class="verdict ${item.verdict}">${verdictLabel}</span>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    runButton.addEventListener("click", renderResults);
+
+    renderSamples();
+    renderResults();
+  </script>
+</body>
+</html>
